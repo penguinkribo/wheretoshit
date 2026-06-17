@@ -81,6 +81,14 @@ export default function ToiletDetailClient({
         >
           Write a Review ✍️
         </Link>
+        <a
+          href={`https://www.google.com/maps/dir/?api=1&destination=${toilet.lat},${toilet.lng}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-green-500 text-white px-4 py-3 rounded-xl font-semibold text-sm hover:bg-green-600 transition-colors whitespace-nowrap"
+        >
+          Get Directions 🧭
+        </a>
         <VerifyButton toiletId={toilet.id} />
       </div>
 

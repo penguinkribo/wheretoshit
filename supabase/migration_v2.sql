@@ -56,7 +56,7 @@ select
   coalesce(v.verification_count, 0)::int as verification_count,
   coalesce(v.verification_count, 0) >= 3 as is_verified,
   coalesce(rep.report_count, 0)::int as report_count,
-  coalesce(rep.report_count, 0) >= 5 as is_flagged
+  coalesce(rep.report_count, 0) >= 3 as is_flagged
 from public.toilets t
 left join (
   select
