@@ -37,7 +37,7 @@ export default function Header() {
             href="/add"
             className="bg-accent text-primary px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-semibold text-xs sm:text-sm hover:bg-accent-light transition-colors whitespace-nowrap"
           >
-            + Add
+            + Add Toilet
           </Link>
         </div>
       </nav>
