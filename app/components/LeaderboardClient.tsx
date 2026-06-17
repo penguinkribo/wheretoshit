@@ -26,39 +26,39 @@ export default function LeaderboardClient({
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       {/* Header */}
-      <div className="grid grid-cols-[3rem_1fr_4rem_4rem_4rem] sm:grid-cols-[3rem_1fr_5rem_5rem_5rem_5rem] gap-2 px-4 py-3 bg-gray-50 text-xs font-semibold text-gray-500">
+      <div className="grid grid-cols-[2.5rem_1fr_3.5rem] sm:grid-cols-[2.5rem_1fr_4rem_4rem_4rem_4rem] gap-1 sm:gap-2 px-3 sm:px-4 py-3 bg-gray-50 text-xs font-semibold text-gray-500">
         <span>#</span>
         <span>User</span>
-        <span className="text-center">Score</span>
+        <span className="text-right sm:text-center">Pts</span>
         <span className="text-center hidden sm:block">🚽</span>
         <span className="text-center hidden sm:block">⭐</span>
-        <span className="text-center">Pts</span>
+        <span className="text-center hidden sm:block">📸</span>
       </div>
 
       {/* Rows */}
       {entries.map((entry, index) => {
         const isCurrentUser = entry.id === userId;
         const rank = index + 1;
-        const rankEmoji =
+        const rankDisplay =
           rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `${rank}`;
 
         return (
           <div
             key={entry.id}
-            className={`grid grid-cols-[3rem_1fr_4rem_4rem_4rem] sm:grid-cols-[3rem_1fr_5rem_5rem_5rem_5rem] gap-2 px-4 py-3 border-t border-gray-50 items-center ${
+            className={`grid grid-cols-[2.5rem_1fr_3.5rem] sm:grid-cols-[2.5rem_1fr_4rem_4rem_4rem_4rem] gap-1 sm:gap-2 px-3 sm:px-4 py-3 border-t border-gray-50 items-center ${
               isCurrentUser ? "bg-primary/10" : ""
             }`}
           >
-            <span className="text-sm font-bold">{rankEmoji}</span>
+            <span className="text-sm font-bold">{rankDisplay}</span>
             <span
-              className={`text-sm truncate ${isCurrentUser ? "font-bold text-accent" : "text-gray-700"}`}
+              className={`text-sm min-w-0 break-words ${isCurrentUser ? "font-bold text-accent" : "text-gray-700"}`}
             >
               {entry.nickname}
               {isCurrentUser && (
                 <span className="text-xs text-primary ml-1">(you)</span>
               )}
             </span>
-            <span className="text-center text-sm font-bold text-primary">
+            <span className="text-right sm:text-center text-sm font-bold text-primary">
               {entry.score}
             </span>
             <span className="text-center text-xs text-gray-500 hidden sm:block">
@@ -67,8 +67,8 @@ export default function LeaderboardClient({
             <span className="text-center text-xs text-gray-500 hidden sm:block">
               {entry.review_count}
             </span>
-            <span className="text-center text-sm font-semibold text-accent">
-              {entry.score}
+            <span className="text-center text-xs text-gray-500 hidden sm:block">
+              {entry.photo_count}
             </span>
           </div>
         );
