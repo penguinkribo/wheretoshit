@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(mkdir -p \"d:\\\\Bintang\\\\App\\\\wheretoshit\\\\app\\\\toilet\\\\[id]\\\\review\")",
+      "Bash(npm run *)"
+    ],
+    "additionalDirectories": [
+      "d:\\Bintang\\App\\wheretoshit\\app\\toilet\\[id]"
+    ]
+  }
+}
