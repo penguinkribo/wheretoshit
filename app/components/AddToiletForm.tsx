@@ -6,9 +6,11 @@ import { createClient } from "@/app/lib/supabase/client";
 import { uploadPhoto } from "@/app/lib/supabase/storage";
 import { searchAddress } from "@/app/lib/nominatim";
 import { NominatimResult } from "@/app/lib/types";
+import { useUserContext } from "./UserProvider";
 
 export default function AddToiletForm() {
   const router = useRouter();
+  const { userId } = useUserContext();
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [lat, setLat] = useState<number | null>(null);
@@ -96,6 +98,7 @@ export default function AddToiletForm() {
           lng,
           has_bidet: hasBidet,
           is_free: isFree,
+          user_id: userId,
         })
         .select()
         .single();
@@ -106,7 +109,7 @@ export default function AddToiletForm() {
         const storageUrl = await uploadPhoto(toilet.id, file);
         await supabase
           .from("photos")
-          .insert({ toilet_id: toilet.id, storage_url: storageUrl });
+          .insert({ toilet_id: toilet.id, storage_url: storageUrl, user_id: userId });
       }
 
       router.push(`/toilet/${toilet.id}`);

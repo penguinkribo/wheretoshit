@@ -11,7 +11,7 @@ interface ToiletCardProps {
 
 export default function ToiletCard({ toilet, distance }: ToiletCardProps) {
   return (
-    <Link href={`/toilet/${toilet.id}`}>
+    <Link href={`/toilet/${toilet.id}`} className="block">
       <div className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
@@ -46,6 +46,12 @@ export default function ToiletCard({ toilet, distance }: ToiletCardProps) {
           >
             {toilet.is_free ? "Free" : "Paid"}
           </span>
+
+          {toilet.is_verified && (
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+              Verified ✅
+            </span>
+          )}
         </div>
       </div>
     </Link>

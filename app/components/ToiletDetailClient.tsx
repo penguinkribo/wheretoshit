@@ -5,6 +5,8 @@ import Image from "next/image";
 import { ToiletWithStats, Review, Photo } from "@/app/lib/types";
 import MapView from "./MapView";
 import StarRating from "./StarRating";
+import VerifyButton from "./VerifyButton";
+import ReportButton from "./ReportButton";
 
 interface ToiletDetailClientProps {
   toilet: ToiletWithStats;
@@ -19,6 +21,13 @@ export default function ToiletDetailClient({
 }: ToiletDetailClientProps) {
   return (
     <div className="space-y-6">
+      {/* Flagged Warning */}
+      {toilet.is_flagged && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+          🚩 This toilet has been flagged by the community and may not exist.
+        </div>
+      )}
+
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-accent">{toilet.name}</h1>
@@ -48,6 +57,16 @@ export default function ToiletDetailClient({
           >
             {toilet.is_free ? "Free" : "Paid"}
           </span>
+
+          {toilet.is_verified ? (
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">
+              Verified ✅ ({toilet.verification_count})
+            </span>
+          ) : toilet.verification_count > 0 ? (
+            <span className="text-xs text-gray-500">
+              👀 {toilet.verification_count} verified
+            </span>
+          ) : null}
         </div>
       </div>
 
@@ -62,6 +81,11 @@ export default function ToiletDetailClient({
         >
           Write a Review ✍️
         </Link>
+        <VerifyButton toiletId={toilet.id} />
+      </div>
+
+      <div className="flex justify-end">
+        <ReportButton targetType="toilet" targetId={toilet.id} />
       </div>
 
       {/* Photos */}
@@ -103,11 +127,17 @@ export default function ToiletDetailClient({
                 key={review.id}
                 className="bg-white rounded-xl p-4 border border-gray-100"
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <StarRating value={review.rating} size="sm" />
-                  <span className="text-xs text-gray-400">
-                    {new Date(review.created_at).toLocaleDateString()}
-                  </span>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <StarRating value={review.rating} size="sm" />
+                    <span className="text-xs font-medium text-accent/70">
+                      {review.users?.nickname ?? "Anonymous"}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {new Date(review.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <ReportButton targetType="review" targetId={review.id} />
                 </div>
                 {review.has_bidet && (
                   <p className="text-xs text-blue-600 mb-1">

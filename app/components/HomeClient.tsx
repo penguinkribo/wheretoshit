@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { ToiletWithStats } from "@/app/lib/types";
 import { haversineDistance } from "@/app/lib/distance";
 import { searchAddress } from "@/app/lib/nominatim";
@@ -25,6 +25,9 @@ export default function HomeClient({ toilets }: HomeClientProps) {
     lng: number;
   } | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(3);
+
+  const PAGE_SIZE = 3;
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -64,6 +67,13 @@ export default function HomeClient({ toilets }: HomeClientProps) {
       return distA - distB;
     });
   }, [toilets, referenceLocation]);
+
+  const visibleToilets = sortedToilets.slice(0, visibleCount);
+  const hasMore = visibleCount < sortedToilets.length;
+
+  const loadMore = useCallback(() => {
+    setVisibleCount((prev) => prev + PAGE_SIZE);
+  }, []);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,8 +145,8 @@ export default function HomeClient({ toilets }: HomeClientProps) {
       {locationStatus !== "loading" && (
         <>
           {sortedToilets.length > 0 ? (
-            <div className="space-y-3">
-              {sortedToilets.map((toilet) => (
+            <div className="flex flex-col gap-2">
+              {visibleToilets.map((toilet) => (
                 <ToiletCard
                   key={toilet.id}
                   toilet={toilet}
@@ -152,6 +162,15 @@ export default function HomeClient({ toilets }: HomeClientProps) {
                   }
                 />
               ))}
+
+              {hasMore && (
+                <button
+                  onClick={loadMore}
+                  className="w-full py-3 text-center bg-white border border-gray-200 rounded-2xl text-sm font-semibold text-accent hover:bg-gray-50 transition-colors"
+                >
+                  Load More Toilets 🚽
+                </button>
+              )}
             </div>
           ) : (
             <div className="text-center py-16">

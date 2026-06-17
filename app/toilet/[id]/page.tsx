@@ -20,7 +20,7 @@ export default async function ToiletDetailPage({
 
   const { data: reviews } = await supabase
     .from("reviews")
-    .select("*")
+    .select("*, users(nickname)")
     .eq("toilet_id", id)
     .order("created_at", { ascending: false });
 

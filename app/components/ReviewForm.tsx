@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/app/lib/supabase/client";
 import { uploadPhoto } from "@/app/lib/supabase/storage";
 import StarRating from "./StarRating";
+import { useUserContext } from "./UserProvider";
 
 interface ReviewFormProps {
   toiletId: string;
@@ -12,6 +13,7 @@ interface ReviewFormProps {
 
 export default function ReviewForm({ toiletId }: ReviewFormProps) {
   const router = useRouter();
+  const { userId } = useUserContext();
   const [rating, setRating] = useState(0);
   const [hasBidet, setHasBidet] = useState(false);
   const [comment, setComment] = useState("");
@@ -48,6 +50,7 @@ export default function ReviewForm({ toiletId }: ReviewFormProps) {
         rating,
         has_bidet: hasBidet,
         comment: comment.trim() || null,
+        user_id: userId,
       });
 
       if (insertError) throw insertError;
@@ -56,7 +59,7 @@ export default function ReviewForm({ toiletId }: ReviewFormProps) {
         const storageUrl = await uploadPhoto(toiletId, file);
         await supabase
           .from("photos")
-          .insert({ toilet_id: toiletId, storage_url: storageUrl });
+          .insert({ toilet_id: toiletId, storage_url: storageUrl, user_id: userId });
       }
 
       router.push(`/toilet/${toiletId}`);
