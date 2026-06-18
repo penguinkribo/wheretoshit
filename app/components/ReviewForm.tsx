@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/app/lib/supabase/client";
 import { uploadPhoto } from "@/app/lib/supabase/storage";
 import StarRating from "./StarRating";
+import { BADGE_DEFINITIONS } from "@/app/lib/badges";
 import { useUserContext } from "./UserProvider";
+import SuccessModal from "./SuccessModal";
 
 interface ReviewFormProps {
   toiletId: string;
@@ -20,6 +22,8 @@ export default function ReviewForm({ toiletId }: ReviewFormProps) {
   const [photos, setPhotos] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [newBadge, setNewBadge] = useState<{ emoji: string; name: string } | null>(null);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -45,6 +49,16 @@ export default function ReviewForm({ toiletId }: ReviewFormProps) {
     try {
       const supabase = createClient();
 
+      let prevReviewCount = 0;
+      if (userId) {
+        const { data: stats } = await supabase
+          .from("leaderboard")
+          .select("review_count")
+          .eq("id", userId)
+          .single();
+        prevReviewCount = stats?.review_count ?? 0;
+      }
+
       const { error: insertError } = await supabase.from("reviews").insert({
         toilet_id: toiletId,
         rating,
@@ -62,14 +76,34 @@ export default function ReviewForm({ toiletId }: ReviewFormProps) {
           .insert({ toilet_id: toiletId, storage_url: storageUrl, user_id: userId });
       }
 
-      router.push(`/toilet/${toiletId}`);
-      router.refresh();
+      const newCount = prevReviewCount + 1;
+      const earned = BADGE_DEFINITIONS.find(
+        (b) =>
+          b.check({ toilet_count: 0, review_count: newCount, photo_count: 0, verification_count: 0, bidet_review_count: 0 }) &&
+          !b.check({ toilet_count: 0, review_count: prevReviewCount, photo_count: 0, verification_count: 0, bidet_review_count: 0 })
+      );
+
+      if (earned) setNewBadge({ emoji: earned.emoji, name: earned.name });
+      setShowSuccess(true);
     } catch {
       setError("Failed to submit review. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (showSuccess) {
+    return (
+      <SuccessModal
+        type="review"
+        newBadge={newBadge}
+        onContinue={() => {
+          router.push(`/toilet/${toiletId}`);
+          router.refresh();
+        }}
+      />
+    );
+  }
 
   return (
     <form

@@ -6,7 +6,9 @@ import { createClient } from "@/app/lib/supabase/client";
 import { uploadPhoto } from "@/app/lib/supabase/storage";
 import { searchAddress } from "@/app/lib/nominatim";
 import { NominatimResult } from "@/app/lib/types";
+import { BADGE_DEFINITIONS } from "@/app/lib/badges";
 import { useUserContext } from "./UserProvider";
+import SuccessModal from "./SuccessModal";
 
 export default function AddToiletForm() {
   const router = useRouter();
@@ -22,6 +24,9 @@ export default function AddToiletForm() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [newBadge, setNewBadge] = useState<{ emoji: string; name: string } | null>(null);
+  const [newToiletId, setNewToiletId] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   useEffect(() => {
@@ -89,6 +94,16 @@ export default function AddToiletForm() {
     try {
       const supabase = createClient();
 
+      let prevToiletCount = 0;
+      if (userId) {
+        const { data: stats } = await supabase
+          .from("leaderboard")
+          .select("toilet_count")
+          .eq("id", userId)
+          .single();
+        prevToiletCount = stats?.toilet_count ?? 0;
+      }
+
       const { data: toilet, error: insertError } = await supabase
         .from("toilets")
         .insert({
@@ -112,13 +127,32 @@ export default function AddToiletForm() {
           .insert({ toilet_id: toilet.id, storage_url: storageUrl, user_id: userId });
       }
 
-      router.push(`/toilet/${toilet.id}`);
+      const newCount = prevToiletCount + 1;
+      const earned = BADGE_DEFINITIONS.find(
+        (b) =>
+          b.check({ toilet_count: newCount, review_count: 0, photo_count: 0, verification_count: 0, bidet_review_count: 0 }) &&
+          !b.check({ toilet_count: prevToiletCount, review_count: 0, photo_count: 0, verification_count: 0, bidet_review_count: 0 })
+      );
+
+      setNewToiletId(toilet.id);
+      if (earned) setNewBadge({ emoji: earned.emoji, name: earned.name });
+      setShowSuccess(true);
     } catch {
       setError("Failed to add toilet. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (showSuccess) {
+    return (
+      <SuccessModal
+        type="toilet"
+        newBadge={newBadge}
+        onContinue={() => router.push(`/toilet/${newToiletId}`)}
+      />
+    );
+  }
 
   return (
     <form
